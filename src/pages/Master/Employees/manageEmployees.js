@@ -5,6 +5,7 @@ import PreviewCardHeader from '../../../Components/Common/PreviewCardHeader';
 import { Link } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import axios from 'axios';
 
 
 const ManageEmployees = () => {
@@ -23,15 +24,9 @@ const ManageEmployees = () => {
 
 
     const searchTable =
-    [
-      { id: "05", employeetype:'Full Time',skilltype:'Unskilled', wagetype:'Monthly Wage', name: "Ashok Patil",gender:'Male',aadharno:'9872628876287',panno:'JANA021K', primaryphoneno: "9889883241", secondayphoneno: "9889883241",emailid:'email@gmail.com',wage:'10000', added: "Feb 02, 2024" },
-      { id: "04", employeetype:'Full Time',skilltype:'Unskilled', wagetype:'Monthly Wage', name: "Ashok Patil",gender:'Male',aadharno:'9872628876287',panno:'JANA021K', primaryphoneno: "9889883241", secondayphoneno: "9889883241",emailid:'email@gmail.com',wage:'10000', added: "Feb 02, 2024" },
-      { id: "03", employeetype:'Full Time',skilltype:'Unskilled', wagetype:'Monthly Wage', name: "Ashok Patil",gender:'Male',aadharno:'9872628876287',panno:'JANA021K', primaryphoneno: "9889883241", secondayphoneno: "9889883241",emailid:'email@gmail.com',wage:'10000', added: "Feb 02, 2024" },
-      { id: "02", employeetype:'Full Time',skilltype:'Unskilled', wagetype:'Monthly Wage', name: "Ashok Patil",gender:'Male',aadharno:'9872628876287',panno:'JANA021K', primaryphoneno: "9889883241", secondayphoneno: "9889883241",emailid:'email@gmail.com',wage:'10000', added: "Feb 02, 2024" },
-      { id: "01", employeetype:'Full Time',skilltype:'Unskilled', wagetype:'Monthly Wage', name: "Ashok Patil",gender:'Male',aadharno:'9872628876287',panno:'JANA021K', primaryphoneno: "9889883241", secondayphoneno: "9889883241",emailid:'email@gmail.com',wage:'10000', added: "Feb 02, 2024" }
-    ];
-    const [employee, setEmployee] = useState(searchTable);
-    const [value, setvalue] = useState([{name:'', vendor: '', company: '', primaryphoneno: '', secondayphoneno:'', emailid: '',gstno:'',panno:'', msme:'',rawmaterialsupply:'', transportno:'', volume:'', activationdate:''}]);
+    [];
+    const [employee, setEmployee] = useState([]);
+    const [value, setvalue] = useState([{ employeetype: '', skilltype: '', wagetype: '',employeename:'',gender:'',aadharno:'',panno:'', primaryphoneno: '', secondaryphoneno: '', emailid: '', wage: '' }]);
     const [isvissibleone, setVissibleone] = useState('');
     const [isvissibletwo, setVissibletwo] = useState('d-none');
     const [isDisabled, setIsDisabled] = useState(false);
@@ -50,8 +45,10 @@ const ManageEmployees = () => {
     };
   
     useEffect(() => {
-      const filteredemployee = filteremployee(searchValue);
-      setEmployee(filteredemployee);
+        axios.get('http://13.233.230.0:4500/api/employee/')
+        .then(response => setEmployee(response));
+    //   const filteredemployee = filteremployee(searchValue);
+    //   setEmployee(filteredemployee);
     }, [searchValue]);
 
 
@@ -68,7 +65,8 @@ const ManageEmployees = () => {
         console.log(id);
         setEmployee(employee.filter((item) => item.id !== id));
         setmodal_delete(false);
-        toast.error('Deleted Sucessfully');
+        axios.delete(`http://13.233.230.0:4500/api/employee/${id}`)
+        .then(response => toast.error('Deleted Sucessfully'));
     };
     const updateHandler = (id) => {
         setVissibleone('d-none');
@@ -88,8 +86,9 @@ const ManageEmployees = () => {
           return row;
         }
       });
+      axios.put(`http://13.233.230.0:4500/api/employee/${id}`, value)
+      .then(response => toast.success(response.message));
       setEmployee(updatedArr);
-      toast.success('Updated Sucessfully');
       console.log({...employee,updatedArr});
     };
 
@@ -142,11 +141,11 @@ const ManageEmployees = () => {
                                                     {employee.map((item, index) =>
                                                         <tr key={index}>
                                                             <td className="id">{item.id}</td>
-                                                            <td className="name">{item.name}</td>
+                                                            <td className="name">{item.employeename}</td>
                                                             <td className="type">{item.employeetype}</td>
                                                             <td className="measurementunit">{item.skilltype}</td>
                                                             <td className="density">{item.primaryphoneno}</td>
-                                                            <td className="added">{item.added}</td>
+                                                            <td className="added">2024-02-06</td>
                                                             <td>
                                                                 <div className="d-flex justify-content-center gap-2">
                                                                     <div className="view">
@@ -240,7 +239,7 @@ const ManageEmployees = () => {
                                                 </Col>
                                                 <Col lg={4}>
                                                     <div className="form-floating">
-                                                        <Input type="text" className="form-control" name="name" value={value.name} onChange={onChangeValue} disabled={isDisabled} placeholder="" />
+                                                        <Input type="text" className="form-control" name="employeename" value={value.employeename} onChange={onChangeValue} disabled={isDisabled} placeholder="" />
                                                         <Label htmlFor="namefloatingInput">Employee Name</Label>
                                                     </div>
                                                 </Col>
@@ -274,7 +273,7 @@ const ManageEmployees = () => {
                                                 </Col>
                                                 <Col lg={4}>
                                                     <div className="form-floating">
-                                                        <Input type="text" className="form-control" name="secondaryphoneno" value={value.secondayphoneno} onChange={onChangeValue} disabled={isDisabled} placeholder="" />
+                                                        <Input type="text" className="form-control" name="secondaryphoneno" value={value.secondaryphoneno} onChange={onChangeValue} disabled={isDisabled} placeholder="" />
                                                         <Label htmlFor="namefloatingInput">Reference/Family Phone Number</Label>
                                                     </div>
                                                 </Col>
@@ -293,6 +292,24 @@ const ManageEmployees = () => {
                                                 <Col lg={4}>
                                                     <div>
                                                         <Label htmlFor="formFile" className="form-label" >Upload Photo</Label>
+                                                        <Input className="form-control" type="file" id="formFile" />
+                                                    </div>
+                                                </Col>
+                                                <Col lg={4}>
+                                                    <div>
+                                                        <Label htmlFor="formFile" className="form-label">Upload CV</Label>
+                                                        <Input className="form-control" type="file" id="formFile" />
+                                                    </div>
+                                                </Col>
+                                                <Col lg={4}>
+                                                    <div>
+                                                        <Label htmlFor="formFile" className="form-label">Aadharcard</Label>
+                                                        <Input className="form-control" type="file" id="formFile" />
+                                                    </div>
+                                                </Col>
+                                                <Col lg={4}>
+                                                    <div>
+                                                        <Label htmlFor="formFile" className="form-label">Pan Card Photo</Label>
                                                         <Input className="form-control" type="file" id="formFile" />
                                                     </div>
                                                 </Col>

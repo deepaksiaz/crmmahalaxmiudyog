@@ -80,112 +80,14 @@ const CreateChallan = () => {
 
     const [count, setCount] = useState(0);
     const [rate, setRate] = useState(0);
-    const [tax, setTax] = useState(0);
-    const [dis, setDis] = useState(0);
-    const [charge, setCharge] = useState(0);
 
-    useEffect(() => {
-        let tax = (0.125 * rate * count);
-        let dis = (0.15 * rate * count);
 
-        if ((rate && count) && isNaN !== 0) {
-            setCharge(65);
-        } else {
-            setCharge(0);
-
-        }
-        setTax(tax);
-        setDis(dis);
-    }, [rate, count]);
-
-    const dateFormat = () => {
-        let d = new Date(),
-            months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-        return ((d.getDate() + ' ' + months[d.getMonth()] + ', ' + d.getFullYear()).toString());
-    };
-
-    const [date, setDate] = useState(dateFormat());
-
-    const dateformate = (e) => {
-        const date = e.toString().split(" ");
-        const joinDate = (date[2] + " " + date[1] + ", " + date[3]).toString();
-        setDate(joinDate);
-    };
+  
 
 
 
-    document.title = "Create Invoice ";
 
-    const validation = useFormik({
-        enableReinitialize: true,
-
-        initialValues: {
-            postalcode: "",
-            registration: "",
-            email: "",
-            website: "",
-            contact: "",
-            invoiceId: "",
-            date: "",
-            name: "",
-            status: "",
-            country: "",
-            amount: "",
-            billing_address: "",
-            billing_phone: "",
-            billing_taxno: "",
-            shipping_name: "",
-            shipping_address: "",
-            shipping_phone: "",
-            shipping_taxno: "",
-            product_name: "",
-        },
-        validationSchema: Yup.object({
-            postalcode: Yup.string().required("This field is required"),
-            registration: Yup.string().required("Please Enter a registration no"),
-            email: Yup.string().required("Please Enter a Email"),
-            website: Yup.string().required("Please Enter a website"),
-            contact: Yup.string().required("Please Enter a contact number"),
-            invoiceId: Yup.string().required("This field is required"),
-            name: Yup.string().required("Please Enter a Full name"),
-            // country: Yup.string().required("Please Enter a Country"),
-            billing_address: Yup.string().required("Please Enter a Address"),
-            billing_phone: Yup.string().required("Please Enter a Phone Number"),
-            billing_taxno: Yup.string().required("Please Enter a tax Number"),
-            shipping_name: Yup.string().required("Please Enter a Full name"),
-            shipping_address: Yup.string().required("Please Enter a Address"),
-            shipping_phone: Yup.string().required("Please Enter a Phone Number"),
-            shipping_taxno: Yup.string().required("Please enter a tax Number"),
-            product_name: Yup.string().required("Please Enter a product Name"),
-        }),
-        onSubmit: (values) => {
-            const newInvoice = {
-                _id: (Math.floor(Math.random() * (30 - 20)) + 20).toString(),
-                postalcode: values.postalcode,
-                registration: values.registration,
-                email: values.email,
-                website: values.website,
-                contact: values.contact,
-                invoiceId: values.invoiceId,
-                date: date,
-                name: values.name,
-                status: values.status,
-                country: "India",
-                amount: Math.round(rate * count + tax + charge - dis),
-                billing_address: values.billing_address,
-                billing_phone: values.billing_phone,
-                billing_taxno: values.billing_taxno,
-                shipping_name: values.shipping_name,
-                shipping_address: values.shipping_address,
-                shipping_phone: values.shipping_phone,
-                shipping_taxno: values.shipping_taxno,
-                product_name: values.product_name,
-            };
-            dispatch(onAddNewInvoice(newInvoice));
-            history("/apps-invoices-list");
-            validation.resetForm();
-        },
-    });
+    document.title = "Create Challan ";
 
     return (
         <div className="page-content">
@@ -195,11 +97,6 @@ const CreateChallan = () => {
                     <Col xxl={12}>
                         <Card>
                             <Form
-                                onSubmit={(e) => {
-                                    e.preventDefault();
-                                    validation.handleSubmit();
-                                    return false;
-                                }}
                                 className="needs-validation"
                                 id="invoice_form"
                             >
@@ -207,21 +104,17 @@ const CreateChallan = () => {
                                 <CardBody className="p-4">
                                     <Row className="g-3 d-flex flex-row justify-content-between">
                                         <Col lg={3} sm={6}>
-                                            <Label for="invoicenoInput">Invoice No</Label>
+                                            <Label for="invoicenoInput">Challan No</Label>
                                             <Input
                                                 type="text"
                                                 className="form-control bg-light border-0"
                                                 id="invoicenoInput"
                                                 name="invoiceId"
-                                                value={validation.values.invoiceId || ""}
-                                                onBlur={validation.handleBlur}
-                                                onChange={validation.handleChange}
-                                                placeholder="Invoice No"
-                                                invalid={validation.errors.invoiceId && validation.touched.invoiceId ? true : false}
+                                               
+                                                placeholder="Challan No"
+                                               
                                             />
-                                            {validation.errors.invoiceId && validation.touched.invoiceId ? (
-                                                <FormFeedback type="invalid">{validation.errors.invoiceId}</FormFeedback>
-                                            ) : null}
+                                           
                                         </Col>
                                         <Col lg={3} sm={6}>
                                             <div>
@@ -236,14 +129,9 @@ const CreateChallan = () => {
                                                         altFormat: "d M, Y",
                                                         dateFormat: "d M, Y",
                                                     }}
-                                                    onChange={(e) =>
-                                                        dateformate(e)
-                                                    }
-                                                    value={validation.values.date || ""}
+                                                    
                                                 />
-                                                {validation.touched.date && validation.errors.date ? (
-                                                    <FormFeedback type="invalid">{validation.errors.date}</FormFeedback>
-                                                ) : null}
+                                                
                                             </div>
                                         </Col>
                                     </Row>
@@ -337,14 +225,9 @@ const CreateChallan = () => {
                                                                 id="productName-1"
                                                                 placeholder="Product Name"
                                                                 name="product_name"
-                                                                value={validation.values.product_name || ""}
-                                                                onBlur={validation.handleBlur}
-                                                                onChange={validation.handleChange}
-                                                                invalid={validation.errors.product_name && validation.touched.product_name ? true : false}
+                                                            
                                                             />
-                                                            {validation.errors.product_name && validation.touched.product_name ? (
-                                                                <FormFeedback type="invalid">{validation.errors.product_name}</FormFeedback>
-                                                            ) : null}
+                                                            
 
                                                         </div>
                                                     </td>
@@ -408,14 +291,8 @@ const CreateChallan = () => {
                                                                 altFormat: "d M, Y",
                                                                 dateFormat: "d M, Y",
                                                             }}
-                                                            onChange={(e) =>
-                                                                dateformate(e)
-                                                            }
-                                                            value={validation.values.date || ""}
                                                         />
-                                                        {validation.touched.date && validation.errors.date ? (
-                                                            <FormFeedback type="invalid">{validation.errors.date}</FormFeedback>
-                                                        ) : null}
+                                                        
                                                     </td>
                                                     <td className="product-removal">
                                                         <Link to="#" className="btn btn-success">

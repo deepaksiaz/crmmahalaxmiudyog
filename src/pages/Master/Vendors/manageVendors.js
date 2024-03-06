@@ -6,6 +6,7 @@ import PreviewCardHeader from '../../../Components/Common/PreviewCardHeader';
 import { Link } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import axios from 'axios';
 
 
 const ManageVendors = () => {
@@ -24,16 +25,9 @@ const ManageVendors = () => {
 
 
   const searchTable =
-    [
-      { id: "06", vendortype: 'Production', vendor: "Ashok Patil", company: "Sairaj Supplier", primaryphoneno: "9889883241", secondayphoneno: '9828282827', emailid: "abc@email.com", gstno: 'GSTNO121212', panno: 'ADSF0087J', msme: 'MSMENO', rawmaterialsupply: 'Cement', transportno: 'MH23V1098', volume: 'Volume', activationdate: '2024-02-09', added: "Feb 02, 2024" },
-      { id: "05", vendortype: 'Production', vendor: "Ashok Patil", company: "Sairaj Supplier", primaryphoneno: "9889883241", secondayphoneno: '9828282827', emailid: "abc@email.com", gstno: 'GSTNO121212', panno: 'ADSF0087J', msme: 'MSMENO', rawmaterialsupply: 'Cement', transportno: 'MH23V1098', volume: 'Volume', activationdate: '2024-02-09', added: "Feb 02, 2024" },
-      { id: "04", vendortype: 'Production', vendor: "Ashok Patil", company: "Sairaj Supplier", primaryphoneno: "9889883241", secondayphoneno: '9828282827', emailid: "abc@email.com", gstno: 'GSTNO121212', panno: 'ADSF0087J', msme: 'MSMENO', rawmaterialsupply: 'Cement', transportno: 'MH23V1098', volume: 'Volume', activationdate: '2024-02-09', added: "Feb 02, 2024" },
-      { id: "03", vendortype: 'Production', vendor: "Ashok Patil", company: "Sairaj Supplier", primaryphoneno: "9889883241", secondayphoneno: '9828282827', emailid: "abc@email.com", gstno: 'GSTNO121212', panno: 'ADSF0087J', msme: 'MSMENO', rawmaterialsupply: 'Cement', transportno: 'MH23V1098', volume: 'Volume', activationdate: '2024-02-09', added: "Feb 02, 2024" },
-      { id: "02", vendortype: 'Production', vendor: "Ashok Patil", company: "Sairaj Supplier", primaryphoneno: "9889883241", secondayphoneno: '9828282827', emailid: "abc@email.com", gstno: 'GSTNO121212', panno: 'ADSF0087J', msme: 'MSMENO', rawmaterialsupply: 'Cement', transportno: 'MH23V1098', volume: 'Volume', activationdate: '2024-02-09', added: "Feb 02, 2024" },
-      { id: "01", vendortype: 'Production', vendor: "Ashok Patil", company: "Sairaj Supplier", primaryphoneno: "9889883241", secondayphoneno: '9828282827', emailid: "abc@email.com", gstno: 'GSTNO121212', panno: 'ADSF0087J', msme: 'MSMENO', rawmaterialsupply: 'Cement', transportno: 'MH23V1098', volume: 'Volume', activationdate: '2024-02-09', added: "Feb 02, 2024" }
-    ];
-  const [vendors, setVendors] = useState(searchTable);
-  const [value, setvalue] = useState([{ vendortype: '', vendor: '', company: '', primaryphoneno: '', secondayphoneno: '', emailid: '', gstno: '', panno: '', msme: '', rawmaterialsupply: '', transportno: '', volume: '', activationdate: '' }]);
+    [ ];
+  const [vendors, setVendors] = useState([]);
+  const [value, setvalue] = useState([{ vendortype: '', vendor: '', company: '', primaryphoneno: '', secondaryphoneno: '', emailid: '', gstno: '', panno: '', msmeno: '', rawmaterialsupply: '', transportno: '', volume: '', activationdate: '' }]);
   const [isvissibleone, setVissibleone] = useState('');
   const [isvissibletwo, setVissibletwo] = useState('d-none');
   const [isDisabled, setIsDisabled] = useState(false);
@@ -50,8 +44,11 @@ const ManageVendors = () => {
   };
 
   useEffect(() => {
-    const filteredVendors = filterVendors(searchValue);
-    setVendors(filteredVendors);
+    axios.get('http://13.233.230.0:4500/api/vendor/')
+      .then(response => setVendors(response));
+
+    // const filteredVendors = filterVendors(searchValue);
+    // setVendors(filteredVendors);
   }, [searchValue]);
 
   const handleDisable = () => {
@@ -66,7 +63,8 @@ const ManageVendors = () => {
     console.log(id);
     setVendors(vendors.filter((item) => item.id !== id));
     setmodal_delete(false);
-    toast.error('Deleted Sucessfully');
+    axios.delete(`http://13.233.230.0:4500/api/vendor/${id}`)
+    .then(response => toast.error('Deleted Sucessfully'));
   };
   const updateHandler = (id) => {
     setVissibleone('d-none');
@@ -86,8 +84,9 @@ const ManageVendors = () => {
         return row;
       }
     });
+    axios.put(`http://13.233.230.0:4500/api/vendor/${id}`, value)
+      .then(response => toast.success(response.message));
     setVendors(updatedArr);
-    toast.success('Updated Sucessfully');
     console.log({ ...vendors, updatedArr });
   };
 
@@ -116,7 +115,7 @@ const ManageVendors = () => {
                       <Col className="col-sm">
                         <div className="d-flex justify-content-sm-end">
                           <div className="search-box ms-2">
-                            <input type="text" className="form-control search" value={searchValue} onChange={(e)=>setSearchValue(e.target.value)} placeholder="Search..." />
+                            <input type="text" className="form-control search" value={searchValue} onChange={(e) => setSearchValue(e.target.value)} placeholder="Search..." />
                             <i className="ri-search-line search-icon"></i>
                           </div>
                         </div>
@@ -144,7 +143,7 @@ const ManageVendors = () => {
                               <td className="type">{item.company}</td>
                               <td className="measurementunit">{item.primaryphoneno}</td>
                               <td className="density">{item.emailid}</td>
-                              <td className="added">{item.added}</td>
+                              <td className="added">{item.activationdate}</td>
                               <td>
                                 <div className="d-flex justify-content-center gap-2">
                                   <div className="view">
@@ -235,7 +234,7 @@ const ManageVendors = () => {
                         </Col>
                         <Col lg={4}>
                           <div className="form-floating">
-                            <Input type="text" className="form-control" name="secondayphoneno" value={value.secondayphoneno} onChange={onChangeValue} disabled={isDisabled} placeholder="" />
+                            <Input type="text" className="form-control" name="secondaryphoneno" value={value.secondaryphoneno} onChange={onChangeValue} disabled={isDisabled} placeholder="" />
                             <Label htmlFor="namefloatingInput">Secondary Phone Number</Label>
                           </div>
                         </Col>

@@ -6,6 +6,7 @@ import PreviewCardHeader from '../../../Components/Common/PreviewCardHeader';
 import { Link } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import axios from 'axios';
 
 
 const ManageRow = () => {
@@ -23,33 +24,35 @@ const ManageRow = () => {
 
 
 
-    const searchTable =
-        [
-            { id: "06", name: "Cement", type: "Production", measurementunit: "Ton", density: "Density", description: "description", added: "Feb 02, 2024" },
-            { id: "05", name: "Fly ASh", type: "Production", measurementunit: "Ton", density: "Density", description: "description", added: "Feb 02, 2024" },
-            { id: "04", name: "Crush Sand", type: "Production", measurementunit: "Ton", density: "Density", description: "description", added: "Feb 02, 2024" },
-            { id: "03", name: "Water", type: "Production", measurementunit: "Ton", density: "Density", description: "description", added: "Feb 02, 2024" },
-            { id: "02", name: "Diesel", type: "Production", measurementunit: "Ton", density: "Density", description: "description", added: "Feb 02, 2024" },
-            { id: "01", name: "Metal", type: "Production", measurementunit: "Ton", density: "Density", description: "description", added: "Feb 02, 2024" }
-        ];
+    const searchTable = [];
 
     const [rawMaterialData, setRawMaterialData] = useState(searchTable);
-    const [value, setvalue] = useState([{ name: '', type: '', measurementunit: '', density: '', description: '' }]);
+    const [value, setvalue] = useState([{ rawmaterial: '', hsncode: '', gstrate: '', type: '', measurementunit: '', density: '', description: '' }]);
     const [isvissibleone, setVissibleone] = useState('');
     const [isvissibletwo, setVissibletwo] = useState('d-none');
     const [searchValue, setSearchValue] = useState("");
+    const [isDisabled, setIsDisabled] = useState(false);
+    const handleDisable = () => {
+        setIsDisabled(true);
+    };
 
+    const handleEnable = () => {
+        setIsDisabled(false);
+    };
 
     const filterrawMaterialData = (searchValue) => {
         if (searchValue === "") {
             return searchTable;
         }
         return searchTable.filter((article) =>
-            article.name.toLowerCase().includes(searchValue.toLowerCase())
+            article.rawmaterial.toLowerCase().includes(searchValue.toLowerCase())
         );
     };
 
     useEffect(() => {
+        axios.get('http://13.233.230.0:4500/api/rawMaterial')
+        .then(response => setRawMaterialData(response));
+
         const filteredrawMaterialData = filterrawMaterialData(searchValue);
         setRawMaterialData(filteredrawMaterialData);
     }, [searchValue]);
@@ -59,7 +62,8 @@ const ManageRow = () => {
         console.log(id);
         setRawMaterialData(rawMaterialData.filter((item) => item.id !== id));
         setmodal_delete(false);
-        toast.error('Deleted Sucessfully');
+        axios.delete(`http://13.233.230.0:4500/api/rawMaterial/${id}`)
+        .then(response => toast.error('Deleted Sucessfully'));
     };
     const updateHandler = (id) => {
         setVissibleone('d-none');
@@ -67,11 +71,10 @@ const ManageRow = () => {
         setvalue(rawMaterialData.find(item => item.id === id))
         console.log(rawMaterialData)
 
+
     };
 
     const updateRecord = (id) => {
-
-
         const updatedArr = rawMaterialData.map(row => {
             if (row.id === id) {
                 return value;
@@ -79,9 +82,11 @@ const ManageRow = () => {
                 return row;
             }
         });
+        axios.put(`http://13.233.230.0:4500/api/rawMaterial/${id}`,value)
+        .then(response => toast.success(response.message));
         setRawMaterialData(updatedArr);
-        toast.success('Updated Sucessfully');
         console.log({ ...rawMaterialData, updatedArr });
+   
     };
 
     const onChangeValue = (e) => {
@@ -109,7 +114,7 @@ const ManageRow = () => {
                                             <Col className="col-sm">
                                                 <div className="d-flex justify-content-sm-end">
                                                     <div className="search-box ms-2">
-                                                        <input type="text" className="form-control search"  value={searchValue} onChange={(e)=>setSearchValue(e.target.value)} placeholder="Search..." />
+                                                        <input type="text" className="form-control search" value={searchValue} onChange={(e) => setSearchValue(e.target.value)} placeholder="Search..." />
                                                         <i className="ri-search-line search-icon"></i>
                                                     </div>
                                                 </div>
@@ -133,16 +138,20 @@ const ManageRow = () => {
                                                     {rawMaterialData.map((item, index) =>
                                                         <tr key={index}>
                                                             <td className="id">{item.id}</td>
-                                                            <td className="name">{item.name}</td>
+                                                            <td className="name">{item.rawmaterial}</td>
                                                             <td className="type">{item.type}</td>
                                                             <td className="measurementunit">{item.measurementunit}</td>
                                                             <td className="density">{item.density}</td>
-                                                            <td className="added">{item.added}</td>
+                                                            <td className="added">2024-02-06</td>
                                                             <td>
                                                                 <div className="d-flex justify-content-center gap-2">
+                                                                    <div className="view">
+                                                                        <Button className="btn btn-success"
+                                                                            data-bs-toggle="modal" data-bs-target="#showModal" onClick={() => { handleDisable(); updateHandler(item.id); }}><i className="ri-eye-line"></i></Button>
+                                                                    </div>
                                                                     <div className="edit">
                                                                         <Button className="btn btn-success"
-                                                                            data-bs-toggle="modal" data-bs-target="#showModal" onClick={() => updateHandler(item.id)}><i className="ri-pencil-line"></i></Button>
+                                                                            data-bs-toggle="modal" data-bs-target="#showModal" onClick={() => {handleEnable(); updateHandler(item.id)}}><i className="ri-pencil-line"></i></Button>
                                                                     </div>
                                                                     <div className="remove">
                                                                         <Button className="btn btn-soft-danger" onClick={() => tog_delete(item.id)}><i className="ri-delete-bin-2-line"></i></Button>
@@ -190,12 +199,12 @@ const ManageRow = () => {
                                 <PreviewCardHeader title="Update Raw Material" />
                                 <CardBody>
                                     <div className="live-preview">
-                                        <Button className="btn btn-primary mb-3" onClick={() => { setVissibleone(''); setVissibletwo('d-none'); handleEnable(); }}><i className="ri-arrow-left-line"></i></Button>
+                                        <Button className="btn btn-primary mb-3" onClick={() => { setVissibleone(''); setVissibletwo('d-none'); }}><i className="ri-arrow-left-line"></i></Button>
                                         <Form action="#">
                                             <Row className="g-3">
                                                 <Col lg={6}>
                                                     <div className="form-floating">
-                                                        <select className="form-select" name='type' id="floatingSelect" value={value.type} onChange={onChangeValue} aria-label="Raw Material Type">
+                                                        <select className="form-select" name='type' id="floatingSelect" value={value.type} onChange={onChangeValue} disabled={isDisabled} aria-label="Raw Material Type">
                                                             <option>Choose...</option>
                                                             <option>Production</option>
                                                             <option>Non Production</option>
@@ -216,30 +225,42 @@ const ManageRow = () => {
                                                 </Col> */}
                                                 <Col lg={6}>
                                                     <div className="form-floating">
-                                                        <select className="form-select" id="floatingSelect" value={value.measurementunit} name='measurementunit' aria-label="Measurement Unit">
+                                                        <select className="form-select" id="floatingSelect" value={value.measurementunit} name='measurementunit' onChange={onChangeValue} disabled={isDisabled} aria-label="Measurement Unit">
                                                             <option >Choose...</option>
-                                                            <option defaultValue="G">G</option>
-                                                            <option defaultValue="KG">KG</option>
-                                                            <option defaultValue="Ton">Ton</option>
+                                                            <option>G</option>
+                                                            <option>KG</option>
+                                                            <option>Ton</option>
                                                         </select>
                                                         <Label htmlFor="floatingSelect">Measurement Unit</Label>
                                                     </div>
                                                 </Col>
                                                 <Col lg={6}>
                                                     <div className="form-floating">
-                                                        <Input type="text" className="form-control" name='name' value={value.name} onChange={onChangeValue} placeholder="" />
+                                                        <Input type="text" className="form-control" name='rawmaterial' value={value.rawmaterial} onChange={onChangeValue} disabled={isDisabled} placeholder="" />
                                                         <Label htmlFor="namefloatingInput">Raw Material Name</Label>
                                                     </div>
                                                 </Col>
                                                 <Col lg={6}>
                                                     <div className="form-floating">
-                                                        <Input type="text" className="form-control" value={value.density} onChange={onChangeValue} name='density' placeholder="" />
+                                                        <Input type="text" className="form-control" name='hsncode' value={value.hsncode} onChange={onChangeValue} disabled={isDisabled} placeholder="" />
+                                                        <Label htmlFor="namefloatingInput">HSN Code</Label>
+                                                    </div>
+                                                </Col>
+                                                <Col lg={6}>
+                                                    <div className="form-floating">
+                                                        <Input type="text" className="form-control" name='gstrate' value={value.gstrate} onChange={onChangeValue} disabled={isDisabled} placeholder="" />
+                                                        <Label htmlFor="namefloatingInput">GST Rate</Label>
+                                                    </div>
+                                                </Col>
+                                                <Col lg={6}>
+                                                    <div className="form-floating">
+                                                        <Input type="text" className="form-control" value={value.density} onChange={onChangeValue} name='density' disabled={isDisabled} placeholder="" />
                                                         <Label htmlFor="namefloatingInput">Density</Label>
                                                     </div>
                                                 </Col>
                                                 <Col lg={6}>
                                                     <div className="form-floating">
-                                                        <Input type="text" className="form-control" value={value.description} onChange={onChangeValue} name='description' placeholder="" />
+                                                        <Input type="text" className="form-control" value={value.description} onChange={onChangeValue} name='description' disabled={isDisabled} placeholder="" />
                                                         <Label htmlFor="namefloatingInput">Description, If any</Label>
                                                     </div>
                                                 </Col>
